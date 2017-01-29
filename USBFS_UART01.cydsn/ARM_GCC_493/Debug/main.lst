@@ -1,0 +1,825 @@
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 1
+
+
+   1              		.cpu cortex-m0
+   2              		.fpu softvfp
+   3              		.eabi_attribute 20, 1
+   4              		.eabi_attribute 21, 1
+   5              		.eabi_attribute 23, 3
+   6              		.eabi_attribute 24, 1
+   7              		.eabi_attribute 25, 1
+   8              		.eabi_attribute 26, 1
+   9              		.eabi_attribute 30, 6
+  10              		.eabi_attribute 34, 0
+  11              		.eabi_attribute 18, 4
+  12              		.code	16
+  13              		.file	"main.c"
+  14              		.text
+  15              	.Ltext0:
+  16              		.cfi_sections	.debug_frame
+  17              		.global _printf_float
+  18              		.code	16
+  19              		.global	parity
+  20              		.section	.rodata
+  21              		.align	2
+  22              	.LC0:
+  23 0000 4E6F6E65 		.ascii	"None\000"
+  23      00
+  24 0005 000000   		.align	2
+  25              	.LC1:
+  26 0008 4F646400 		.ascii	"Odd\000"
+  27              		.align	2
+  28              	.LC2:
+  29 000c 4576656E 		.ascii	"Even\000"
+  29      00
+  30 0011 000000   		.align	2
+  31              	.LC3:
+  32 0014 4D61726B 		.ascii	"Mark\000"
+  32      00
+  33 0019 000000   		.align	2
+  34              	.LC4:
+  35 001c 53706163 		.ascii	"Space\000"
+  35      6500
+  36              		.data
+  37              		.align	2
+  38              		.type	parity, %object
+  39              		.size	parity, 20
+  40              	parity:
+  41 0000 00000000 		.word	.LC0
+  42 0004 08000000 		.word	.LC1
+  43 0008 0C000000 		.word	.LC2
+  44 000c 14000000 		.word	.LC3
+  45 0010 1C000000 		.word	.LC4
+  46              		.global	stop
+  47              		.section	.rodata
+  48 0022 0000     		.align	2
+  49              	.LC5:
+  50 0024 3100     		.ascii	"1\000"
+  51 0026 0000     		.align	2
+  52              	.LC6:
+  53 0028 312E3500 		.ascii	"1.5\000"
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 2
+
+
+  54              		.align	2
+  55              	.LC7:
+  56 002c 3200     		.ascii	"2\000"
+  57 002e 0000     		.data
+  58              		.align	2
+  59              		.type	stop, %object
+  60              		.size	stop, 12
+  61              	stop:
+  62 0014 24000000 		.word	.LC5
+  63 0018 28000000 		.word	.LC6
+  64 001c 2C000000 		.word	.LC7
+  65              		.section	.text.main,"ax",%progbits
+  66              		.align	2
+  67              		.global	main
+  68              		.code	16
+  69              		.thumb_func
+  70              		.type	main, %function
+  71              	main:
+  72              	.LFB36:
+  73              		.file 1 "main.c"
+   1:main.c        **** /*******************************************************************************
+   2:main.c        **** * File Name: main.c
+   3:main.c        **** *
+   4:main.c        **** * Version: 2.0
+   5:main.c        **** *
+   6:main.c        **** * Description:
+   7:main.c        **** *   The component is enumerated as a Virtual Com port. Receives data from the 
+   8:main.c        **** *   hyper terminal, then sends back the received data.
+   9:main.c        **** *   For PSoC3/PSoC5LP, the LCD shows the line settings.
+  10:main.c        **** *
+  11:main.c        **** * Related Document:
+  12:main.c        **** *  Universal Serial Bus Specification Revision 2.0
+  13:main.c        **** *  Universal Serial Bus Class Definitions for Communications Devices
+  14:main.c        **** *  Revision 1.2
+  15:main.c        **** *
+  16:main.c        **** ********************************************************************************
+  17:main.c        **** * Copyright 2015, Cypress Semiconductor Corporation. All rights reserved.
+  18:main.c        **** * This software is owned by Cypress Semiconductor Corporation and is protected
+  19:main.c        **** * by and subject to worldwide patent and copyright laws and treaties.
+  20:main.c        **** * Therefore, you may use this software only as provided in the license agreement
+  21:main.c        **** * accompanying the software package from which you obtained this software.
+  22:main.c        **** * CYPRESS AND ITS SUPPLIERS MAKE NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+  23:main.c        **** * WITH REGARD TO THIS SOFTWARE, INCLUDING, BUT NOT LIMITED TO, NONINFRINGEMENT,
+  24:main.c        **** * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+  25:main.c        **** *******************************************************************************/
+  26:main.c        **** 
+  27:main.c        **** #include <project.h>
+  28:main.c        **** #include "stdio.h"
+  29:main.c        **** 
+  30:main.c        **** #if defined (__GNUC__)
+  31:main.c        ****     /* Add an explicit reference to the floating point printf library */
+  32:main.c        ****     /* to allow usage of the floating point conversion specifiers. */
+  33:main.c        ****     /* This is not linked in by default with the newlib-nano library. */
+  34:main.c        ****     asm (".global _printf_float");
+  35:main.c        **** #endif
+  36:main.c        **** 
+  37:main.c        **** #define USBFS_DEVICE    (0u)
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 3
+
+
+  38:main.c        **** 
+  39:main.c        **** /* The buffer size is equal to the maximum packet size of the IN and OUT bulk
+  40:main.c        **** * endpoints.
+  41:main.c        **** */
+  42:main.c        **** #define USBUART_BUFFER_SIZE (64u)
+  43:main.c        **** #define LINE_STR_LENGTH     (20u)
+  44:main.c        **** 
+  45:main.c        **** char8* parity[] = {"None", "Odd", "Even", "Mark", "Space"};
+  46:main.c        **** char8* stop[]   = {"1", "1.5", "2"};
+  47:main.c        **** 
+  48:main.c        **** 
+  49:main.c        **** /*******************************************************************************
+  50:main.c        **** * Function Name: main
+  51:main.c        **** ********************************************************************************
+  52:main.c        **** *
+  53:main.c        **** * Summary:
+  54:main.c        **** *  The main function performs the following actions:
+  55:main.c        **** *   1. Waits until VBUS becomes valid and starts the USBFS component which is
+  56:main.c        **** *      enumerated as virtual Com port.
+  57:main.c        **** *   2. Waits until the device is enumerated by the host.
+  58:main.c        **** *   3. Waits for data coming from the hyper terminal and sends it back.
+  59:main.c        **** *   4. PSoC3/PSoC5LP: the LCD shows the line settings.
+  60:main.c        **** *
+  61:main.c        **** * Parameters:
+  62:main.c        **** *  None.
+  63:main.c        **** *
+  64:main.c        **** * Return:
+  65:main.c        **** *  None.
+  66:main.c        **** *
+  67:main.c        **** *******************************************************************************/
+  68:main.c        **** int main()
+  69:main.c        **** {
+  74              		.loc 1 69 0
+  75              		.cfi_startproc
+  76 0000 90B5     		push	{r4, r7, lr}
+  77              		.cfi_def_cfa_offset 12
+  78              		.cfi_offset 4, -12
+  79              		.cfi_offset 7, -8
+  80              		.cfi_offset 14, -4
+  81 0002 93B0     		sub	sp, sp, #76
+  82              		.cfi_def_cfa_offset 88
+  83 0004 00AF     		add	r7, sp, #0
+  84              		.cfi_def_cfa_register 7
+  70:main.c        ****     uint16 count;
+  71:main.c        ****     uint8 buffer[USBUART_BUFFER_SIZE];
+  72:main.c        ****     
+  73:main.c        **** #if (CY_PSOC3 || CY_PSOC5LP)
+  74:main.c        ****     uint8 state;
+  75:main.c        ****     char8 lineStr[LINE_STR_LENGTH];
+  76:main.c        ****     
+  77:main.c        ****     LCD_Start();
+  78:main.c        **** #endif /* (CY_PSOC3 || CY_PSOC5LP) */
+  79:main.c        ****     
+  80:main.c        ****     CyGlobalIntEnable;
+  85              		.loc 1 80 0
+  86              	@ 80 "main.c" 1
+  87 0006 62B6     		CPSIE   i
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 4
+
+
+  88              	@ 0 "" 2
+  81:main.c        **** 
+  82:main.c        ****     /* Start USBFS operation with 5-V operation. */
+  83:main.c        ****     USBUART_Start(USBFS_DEVICE, USBUART_5V_OPERATION);
+  89              		.loc 1 83 0
+  90              		.code	16
+  91 0008 0020     		mov	r0, #0
+  92 000a 0121     		mov	r1, #1
+  93 000c FFF7FEFF 		bl	USBUART_Start
+  94              	.L6:
+  84:main.c        ****     
+  85:main.c        ****     for(;;)
+  86:main.c        ****     {
+  87:main.c        ****         /* Host can send double SET_INTERFACE request. */
+  88:main.c        ****         if (0u != USBUART_IsConfigurationChanged())
+  95              		.loc 1 88 0
+  96 0010 FFF7FEFF 		bl	USBUART_IsConfigurationChanged
+  97 0014 031E     		sub	r3, r0, #0
+  98 0016 05D0     		beq	.L2
+  89:main.c        ****         {
+  90:main.c        ****             /* Initialize IN endpoints when device is configured. */
+  91:main.c        ****             if (0u != USBUART_GetConfiguration())
+  99              		.loc 1 91 0
+ 100 0018 FFF7FEFF 		bl	USBUART_GetConfiguration
+ 101 001c 031E     		sub	r3, r0, #0
+ 102 001e 01D0     		beq	.L2
+  92:main.c        ****             {
+  93:main.c        ****                 /* Enumeration is done, enable OUT endpoint to receive data 
+  94:main.c        ****                  * from host. */
+  95:main.c        ****                 USBUART_CDC_Init();
+ 103              		.loc 1 95 0
+ 104 0020 FFF7FEFF 		bl	USBUART_CDC_Init
+ 105              	.L2:
+  96:main.c        ****             }
+  97:main.c        ****         }
+  98:main.c        **** 
+  99:main.c        ****         /* Service USB CDC when device is configured. */
+ 100:main.c        ****         if (0u != USBUART_GetConfiguration())
+ 106              		.loc 1 100 0
+ 107 0024 FFF7FEFF 		bl	USBUART_GetConfiguration
+ 108 0028 031E     		sub	r3, r0, #0
+ 109 002a 2BD0     		beq	.L3
+ 101:main.c        ****         {
+ 102:main.c        ****             /* Check for input data from host. */
+ 103:main.c        ****             if (0u != USBUART_DataIsReady())
+ 110              		.loc 1 103 0
+ 111 002c FFF7FEFF 		bl	USBUART_DataIsReady
+ 112 0030 031E     		sub	r3, r0, #0
+ 113 0032 27D0     		beq	.L3
+ 104:main.c        ****             {
+ 105:main.c        ****                 /* Read received data and re-enable OUT endpoint. */
+ 106:main.c        ****                 count = USBUART_GetAll(buffer);
+ 114              		.loc 1 106 0
+ 115 0034 4623     		mov	r3, #70
+ 116 0036 FC18     		add	r4, r7, r3
+ 117 0038 3B1D     		add	r3, r7, #4
+ 118 003a 181C     		mov	r0, r3
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 5
+
+
+ 119 003c FFF7FEFF 		bl	USBUART_GetAll
+ 120 0040 031C     		mov	r3, r0
+ 121 0042 2380     		strh	r3, [r4]
+ 107:main.c        **** 
+ 108:main.c        ****                 if (0u != count)
+ 122              		.loc 1 108 0
+ 123 0044 4623     		mov	r3, #70
+ 124 0046 FB18     		add	r3, r7, r3
+ 125 0048 1B88     		ldrh	r3, [r3]
+ 126 004a 002B     		cmp	r3, #0
+ 127 004c 1AD0     		beq	.L3
+ 109:main.c        ****                 {
+ 110:main.c        ****                     /* Wait until component is ready to send data to host. */
+ 111:main.c        ****                     while (0u == USBUART_CDCIsReady())
+ 128              		.loc 1 111 0
+ 129 004e C046     		mov	r8, r8
+ 130              	.L4:
+ 131              		.loc 1 111 0 is_stmt 0 discriminator 1
+ 132 0050 FFF7FEFF 		bl	USBUART_CDCIsReady
+ 133 0054 031E     		sub	r3, r0, #0
+ 134 0056 FBD0     		beq	.L4
+ 112:main.c        ****                     {
+ 113:main.c        ****                     }
+ 114:main.c        **** 
+ 115:main.c        ****                     /* Send data back to host. */
+ 116:main.c        ****                     USBUART_PutData(buffer, count);
+ 135              		.loc 1 116 0 is_stmt 1
+ 136 0058 3A1D     		add	r2, r7, #4
+ 137 005a 4623     		mov	r3, #70
+ 138 005c FB18     		add	r3, r7, r3
+ 139 005e 1B88     		ldrh	r3, [r3]
+ 140 0060 101C     		mov	r0, r2
+ 141 0062 191C     		mov	r1, r3
+ 142 0064 FFF7FEFF 		bl	USBUART_PutData
+ 117:main.c        **** 
+ 118:main.c        ****                     /* If the last sent packet is exactly the maximum packet 
+ 119:main.c        ****                     *  size, it is followed by a zero-length packet to assure
+ 120:main.c        ****                     *  that the end of the segment is properly identified by 
+ 121:main.c        ****                     *  the terminal.
+ 122:main.c        ****                     */
+ 123:main.c        ****                     if (USBUART_BUFFER_SIZE == count)
+ 143              		.loc 1 123 0
+ 144 0068 4623     		mov	r3, #70
+ 145 006a FB18     		add	r3, r7, r3
+ 146 006c 1B88     		ldrh	r3, [r3]
+ 147 006e 402B     		cmp	r3, #64
+ 148 0070 08D1     		bne	.L3
+ 124:main.c        ****                     {
+ 125:main.c        ****                         /* Wait until component is ready to send data to PC. */
+ 126:main.c        ****                         while (0u == USBUART_CDCIsReady())
+ 149              		.loc 1 126 0
+ 150 0072 C046     		mov	r8, r8
+ 151              	.L5:
+ 152              		.loc 1 126 0 is_stmt 0 discriminator 1
+ 153 0074 FFF7FEFF 		bl	USBUART_CDCIsReady
+ 154 0078 031E     		sub	r3, r0, #0
+ 155 007a FBD0     		beq	.L5
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 6
+
+
+ 127:main.c        ****                         {
+ 128:main.c        ****                         }
+ 129:main.c        **** 
+ 130:main.c        ****                         /* Send zero-length packet to PC. */
+ 131:main.c        ****                         USBUART_PutData(NULL, 0u);
+ 156              		.loc 1 131 0 is_stmt 1
+ 157 007c 0020     		mov	r0, #0
+ 158 007e 0021     		mov	r1, #0
+ 159 0080 FFF7FEFF 		bl	USBUART_PutData
+ 160              	.L3:
+ 132:main.c        ****                     }
+ 133:main.c        ****                 }
+ 134:main.c        ****             }
+ 135:main.c        **** 
+ 136:main.c        **** 
+ 137:main.c        ****         #if (CY_PSOC3 || CY_PSOC5LP)
+ 138:main.c        ****             /* Check for Line settings change. */
+ 139:main.c        ****             state = USBUART_IsLineChanged();
+ 140:main.c        ****             if (0u != state)
+ 141:main.c        ****             {
+ 142:main.c        ****                 /* Output on LCD Line Coding settings. */
+ 143:main.c        ****                 if (0u != (state & USBUART_LINE_CODING_CHANGED))
+ 144:main.c        ****                 {                  
+ 145:main.c        ****                     /* Get string to output. */
+ 146:main.c        ****                     sprintf(lineStr,"BR:%4ld %d%c%s", USBUART_GetDTERate(),\
+ 147:main.c        ****                                    (uint16) USBUART_GetDataBits(),\
+ 148:main.c        ****                                    parity[(uint16) USBUART_GetParityType()][0],\
+ 149:main.c        ****                                    stop[(uint16) USBUART_GetCharFormat()]);
+ 150:main.c        **** 
+ 151:main.c        ****                     /* Clear LCD line. */
+ 152:main.c        ****                     LCD_Position(0u, 0u);
+ 153:main.c        ****                     LCD_PrintString("                    ");
+ 154:main.c        **** 
+ 155:main.c        ****                     /* Output string on LCD. */
+ 156:main.c        ****                     LCD_Position(0u, 0u);
+ 157:main.c        ****                     LCD_PrintString(lineStr);
+ 158:main.c        ****                 }
+ 159:main.c        **** 
+ 160:main.c        ****                 /* Output on LCD Line Control settings. */
+ 161:main.c        ****                 if (0u != (state & USBUART_LINE_CONTROL_CHANGED))
+ 162:main.c        ****                 {                   
+ 163:main.c        ****                     /* Get string to output. */
+ 164:main.c        ****                     state = USBUART_GetLineControl();
+ 165:main.c        ****                     sprintf(lineStr,"DTR:%s,RTS:%s",  (0u != (state & USBUART_LINE_CONTROL_DTR)) ? 
+ 166:main.c        ****                                                       (0u != (state & USBUART_LINE_CONTROL_RTS)) ? 
+ 167:main.c        **** 
+ 168:main.c        ****                     /* Clear LCD line. */
+ 169:main.c        ****                     LCD_Position(1u, 0u);
+ 170:main.c        ****                     LCD_PrintString("                    ");
+ 171:main.c        **** 
+ 172:main.c        ****                     /* Output string on LCD. */
+ 173:main.c        ****                     LCD_Position(1u, 0u);
+ 174:main.c        ****                     LCD_PrintString(lineStr);
+ 175:main.c        ****                 }
+ 176:main.c        ****             }
+ 177:main.c        ****         #endif /* (CY_PSOC3 || CY_PSOC5LP) */
+ 178:main.c        ****         }
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 7
+
+
+ 179:main.c        ****     }
+ 161              		.loc 1 179 0
+ 162 0084 C4E7     		b	.L6
+ 163              		.cfi_endproc
+ 164              	.LFE36:
+ 165              		.size	main, .-main
+ 166 0086 C046     		.text
+ 167              	.Letext0:
+ 168              		.file 2 "Generated_Source\\PSoC4/cytypes.h"
+ 169              		.section	.debug_info,"",%progbits
+ 170              	.Ldebug_info0:
+ 171 0000 37010000 		.4byte	0x137
+ 172 0004 0400     		.2byte	0x4
+ 173 0006 00000000 		.4byte	.Ldebug_abbrev0
+ 174 000a 04       		.byte	0x4
+ 175 000b 01       		.uleb128 0x1
+ 176 000c 0E000000 		.4byte	.LASF20
+ 177 0010 01       		.byte	0x1
+ 178 0011 A9000000 		.4byte	.LASF21
+ 179 0015 18010000 		.4byte	.LASF22
+ 180 0019 00000000 		.4byte	.Ldebug_ranges0+0
+ 181 001d 00000000 		.4byte	0
+ 182 0021 00000000 		.4byte	.Ldebug_line0
+ 183 0025 02       		.uleb128 0x2
+ 184 0026 01       		.byte	0x1
+ 185 0027 06       		.byte	0x6
+ 186 0028 7F010000 		.4byte	.LASF0
+ 187 002c 02       		.uleb128 0x2
+ 188 002d 01       		.byte	0x1
+ 189 002e 08       		.byte	0x8
+ 190 002f EA000000 		.4byte	.LASF1
+ 191 0033 02       		.uleb128 0x2
+ 192 0034 02       		.byte	0x2
+ 193 0035 05       		.byte	0x5
+ 194 0036 98010000 		.4byte	.LASF2
+ 195 003a 02       		.uleb128 0x2
+ 196 003b 02       		.byte	0x2
+ 197 003c 07       		.byte	0x7
+ 198 003d 6C010000 		.4byte	.LASF3
+ 199 0041 02       		.uleb128 0x2
+ 200 0042 04       		.byte	0x4
+ 201 0043 05       		.byte	0x5
+ 202 0044 03010000 		.4byte	.LASF4
+ 203 0048 02       		.uleb128 0x2
+ 204 0049 04       		.byte	0x4
+ 205 004a 07       		.byte	0x7
+ 206 004b BB000000 		.4byte	.LASF5
+ 207 004f 02       		.uleb128 0x2
+ 208 0050 08       		.byte	0x8
+ 209 0051 05       		.byte	0x5
+ 210 0052 00000000 		.4byte	.LASF6
+ 211 0056 02       		.uleb128 0x2
+ 212 0057 08       		.byte	0x8
+ 213 0058 07       		.byte	0x7
+ 214 0059 CD000000 		.4byte	.LASF7
+ 215 005d 03       		.uleb128 0x3
+ 216 005e 04       		.byte	0x4
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 8
+
+
+ 217 005f 05       		.byte	0x5
+ 218 0060 696E7400 		.ascii	"int\000"
+ 219 0064 02       		.uleb128 0x2
+ 220 0065 04       		.byte	0x4
+ 221 0066 07       		.byte	0x7
+ 222 0067 9C000000 		.4byte	.LASF8
+ 223 006b 04       		.uleb128 0x4
+ 224 006c B5000000 		.4byte	.LASF9
+ 225 0070 02       		.byte	0x2
+ 226 0071 B901     		.2byte	0x1b9
+ 227 0073 2C000000 		.4byte	0x2c
+ 228 0077 04       		.uleb128 0x4
+ 229 0078 A2010000 		.4byte	.LASF10
+ 230 007c 02       		.byte	0x2
+ 231 007d BA01     		.2byte	0x1ba
+ 232 007f 3A000000 		.4byte	0x3a
+ 233 0083 02       		.uleb128 0x2
+ 234 0084 04       		.byte	0x4
+ 235 0085 04       		.byte	0x4
+ 236 0086 92010000 		.4byte	.LASF11
+ 237 008a 02       		.uleb128 0x2
+ 238 008b 08       		.byte	0x8
+ 239 008c 04       		.byte	0x4
+ 240 008d 0C010000 		.4byte	.LASF12
+ 241 0091 04       		.uleb128 0x4
+ 242 0092 E4000000 		.4byte	.LASF13
+ 243 0096 02       		.byte	0x2
+ 244 0097 CA01     		.2byte	0x1ca
+ 245 0099 9D000000 		.4byte	0x9d
+ 246 009d 02       		.uleb128 0x2
+ 247 009e 01       		.byte	0x1
+ 248 009f 08       		.byte	0x8
+ 249 00a0 F8000000 		.4byte	.LASF14
+ 250 00a4 02       		.uleb128 0x2
+ 251 00a5 04       		.byte	0x4
+ 252 00a6 07       		.byte	0x7
+ 253 00a7 B0010000 		.4byte	.LASF15
+ 254 00ab 05       		.uleb128 0x5
+ 255 00ac B0000000 		.4byte	.LASF23
+ 256 00b0 01       		.byte	0x1
+ 257 00b1 44       		.byte	0x44
+ 258 00b2 5D000000 		.4byte	0x5d
+ 259 00b6 00000000 		.4byte	.LFB36
+ 260 00ba 86000000 		.4byte	.LFE36-.LFB36
+ 261 00be 01       		.uleb128 0x1
+ 262 00bf 9C       		.byte	0x9c
+ 263 00c0 E2000000 		.4byte	0xe2
+ 264 00c4 06       		.uleb128 0x6
+ 265 00c5 FD000000 		.4byte	.LASF16
+ 266 00c9 01       		.byte	0x1
+ 267 00ca 46       		.byte	0x46
+ 268 00cb 77000000 		.4byte	0x77
+ 269 00cf 02       		.uleb128 0x2
+ 270 00d0 91       		.byte	0x91
+ 271 00d1 6E       		.sleb128 -18
+ 272 00d2 06       		.uleb128 0x6
+ 273 00d3 A9010000 		.4byte	.LASF17
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 9
+
+
+ 274 00d7 01       		.byte	0x1
+ 275 00d8 47       		.byte	0x47
+ 276 00d9 E2000000 		.4byte	0xe2
+ 277 00dd 03       		.uleb128 0x3
+ 278 00de 91       		.byte	0x91
+ 279 00df AC7F     		.sleb128 -84
+ 280 00e1 00       		.byte	0
+ 281 00e2 07       		.uleb128 0x7
+ 282 00e3 6B000000 		.4byte	0x6b
+ 283 00e7 F2000000 		.4byte	0xf2
+ 284 00eb 08       		.uleb128 0x8
+ 285 00ec A4000000 		.4byte	0xa4
+ 286 00f0 3F       		.byte	0x3f
+ 287 00f1 00       		.byte	0
+ 288 00f2 07       		.uleb128 0x7
+ 289 00f3 02010000 		.4byte	0x102
+ 290 00f7 02010000 		.4byte	0x102
+ 291 00fb 08       		.uleb128 0x8
+ 292 00fc A4000000 		.4byte	0xa4
+ 293 0100 04       		.byte	0x4
+ 294 0101 00       		.byte	0
+ 295 0102 09       		.uleb128 0x9
+ 296 0103 04       		.byte	0x4
+ 297 0104 91000000 		.4byte	0x91
+ 298 0108 0A       		.uleb128 0xa
+ 299 0109 8B010000 		.4byte	.LASF18
+ 300 010d 01       		.byte	0x1
+ 301 010e 2D       		.byte	0x2d
+ 302 010f F2000000 		.4byte	0xf2
+ 303 0113 05       		.uleb128 0x5
+ 304 0114 03       		.byte	0x3
+ 305 0115 00000000 		.4byte	parity
+ 306 0119 07       		.uleb128 0x7
+ 307 011a 02010000 		.4byte	0x102
+ 308 011e 29010000 		.4byte	0x129
+ 309 0122 08       		.uleb128 0x8
+ 310 0123 A4000000 		.4byte	0xa4
+ 311 0127 02       		.byte	0x2
+ 312 0128 00       		.byte	0
+ 313 0129 0A       		.uleb128 0xa
+ 314 012a 13010000 		.4byte	.LASF19
+ 315 012e 01       		.byte	0x1
+ 316 012f 2E       		.byte	0x2e
+ 317 0130 19010000 		.4byte	0x119
+ 318 0134 05       		.uleb128 0x5
+ 319 0135 03       		.byte	0x3
+ 320 0136 00000000 		.4byte	stop
+ 321 013a 00       		.byte	0
+ 322              		.section	.debug_abbrev,"",%progbits
+ 323              	.Ldebug_abbrev0:
+ 324 0000 01       		.uleb128 0x1
+ 325 0001 11       		.uleb128 0x11
+ 326 0002 01       		.byte	0x1
+ 327 0003 25       		.uleb128 0x25
+ 328 0004 0E       		.uleb128 0xe
+ 329 0005 13       		.uleb128 0x13
+ 330 0006 0B       		.uleb128 0xb
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 10
+
+
+ 331 0007 03       		.uleb128 0x3
+ 332 0008 0E       		.uleb128 0xe
+ 333 0009 1B       		.uleb128 0x1b
+ 334 000a 0E       		.uleb128 0xe
+ 335 000b 55       		.uleb128 0x55
+ 336 000c 17       		.uleb128 0x17
+ 337 000d 11       		.uleb128 0x11
+ 338 000e 01       		.uleb128 0x1
+ 339 000f 10       		.uleb128 0x10
+ 340 0010 17       		.uleb128 0x17
+ 341 0011 00       		.byte	0
+ 342 0012 00       		.byte	0
+ 343 0013 02       		.uleb128 0x2
+ 344 0014 24       		.uleb128 0x24
+ 345 0015 00       		.byte	0
+ 346 0016 0B       		.uleb128 0xb
+ 347 0017 0B       		.uleb128 0xb
+ 348 0018 3E       		.uleb128 0x3e
+ 349 0019 0B       		.uleb128 0xb
+ 350 001a 03       		.uleb128 0x3
+ 351 001b 0E       		.uleb128 0xe
+ 352 001c 00       		.byte	0
+ 353 001d 00       		.byte	0
+ 354 001e 03       		.uleb128 0x3
+ 355 001f 24       		.uleb128 0x24
+ 356 0020 00       		.byte	0
+ 357 0021 0B       		.uleb128 0xb
+ 358 0022 0B       		.uleb128 0xb
+ 359 0023 3E       		.uleb128 0x3e
+ 360 0024 0B       		.uleb128 0xb
+ 361 0025 03       		.uleb128 0x3
+ 362 0026 08       		.uleb128 0x8
+ 363 0027 00       		.byte	0
+ 364 0028 00       		.byte	0
+ 365 0029 04       		.uleb128 0x4
+ 366 002a 16       		.uleb128 0x16
+ 367 002b 00       		.byte	0
+ 368 002c 03       		.uleb128 0x3
+ 369 002d 0E       		.uleb128 0xe
+ 370 002e 3A       		.uleb128 0x3a
+ 371 002f 0B       		.uleb128 0xb
+ 372 0030 3B       		.uleb128 0x3b
+ 373 0031 05       		.uleb128 0x5
+ 374 0032 49       		.uleb128 0x49
+ 375 0033 13       		.uleb128 0x13
+ 376 0034 00       		.byte	0
+ 377 0035 00       		.byte	0
+ 378 0036 05       		.uleb128 0x5
+ 379 0037 2E       		.uleb128 0x2e
+ 380 0038 01       		.byte	0x1
+ 381 0039 3F       		.uleb128 0x3f
+ 382 003a 19       		.uleb128 0x19
+ 383 003b 03       		.uleb128 0x3
+ 384 003c 0E       		.uleb128 0xe
+ 385 003d 3A       		.uleb128 0x3a
+ 386 003e 0B       		.uleb128 0xb
+ 387 003f 3B       		.uleb128 0x3b
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 11
+
+
+ 388 0040 0B       		.uleb128 0xb
+ 389 0041 49       		.uleb128 0x49
+ 390 0042 13       		.uleb128 0x13
+ 391 0043 11       		.uleb128 0x11
+ 392 0044 01       		.uleb128 0x1
+ 393 0045 12       		.uleb128 0x12
+ 394 0046 06       		.uleb128 0x6
+ 395 0047 40       		.uleb128 0x40
+ 396 0048 18       		.uleb128 0x18
+ 397 0049 9642     		.uleb128 0x2116
+ 398 004b 19       		.uleb128 0x19
+ 399 004c 01       		.uleb128 0x1
+ 400 004d 13       		.uleb128 0x13
+ 401 004e 00       		.byte	0
+ 402 004f 00       		.byte	0
+ 403 0050 06       		.uleb128 0x6
+ 404 0051 34       		.uleb128 0x34
+ 405 0052 00       		.byte	0
+ 406 0053 03       		.uleb128 0x3
+ 407 0054 0E       		.uleb128 0xe
+ 408 0055 3A       		.uleb128 0x3a
+ 409 0056 0B       		.uleb128 0xb
+ 410 0057 3B       		.uleb128 0x3b
+ 411 0058 0B       		.uleb128 0xb
+ 412 0059 49       		.uleb128 0x49
+ 413 005a 13       		.uleb128 0x13
+ 414 005b 02       		.uleb128 0x2
+ 415 005c 18       		.uleb128 0x18
+ 416 005d 00       		.byte	0
+ 417 005e 00       		.byte	0
+ 418 005f 07       		.uleb128 0x7
+ 419 0060 01       		.uleb128 0x1
+ 420 0061 01       		.byte	0x1
+ 421 0062 49       		.uleb128 0x49
+ 422 0063 13       		.uleb128 0x13
+ 423 0064 01       		.uleb128 0x1
+ 424 0065 13       		.uleb128 0x13
+ 425 0066 00       		.byte	0
+ 426 0067 00       		.byte	0
+ 427 0068 08       		.uleb128 0x8
+ 428 0069 21       		.uleb128 0x21
+ 429 006a 00       		.byte	0
+ 430 006b 49       		.uleb128 0x49
+ 431 006c 13       		.uleb128 0x13
+ 432 006d 2F       		.uleb128 0x2f
+ 433 006e 0B       		.uleb128 0xb
+ 434 006f 00       		.byte	0
+ 435 0070 00       		.byte	0
+ 436 0071 09       		.uleb128 0x9
+ 437 0072 0F       		.uleb128 0xf
+ 438 0073 00       		.byte	0
+ 439 0074 0B       		.uleb128 0xb
+ 440 0075 0B       		.uleb128 0xb
+ 441 0076 49       		.uleb128 0x49
+ 442 0077 13       		.uleb128 0x13
+ 443 0078 00       		.byte	0
+ 444 0079 00       		.byte	0
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 12
+
+
+ 445 007a 0A       		.uleb128 0xa
+ 446 007b 34       		.uleb128 0x34
+ 447 007c 00       		.byte	0
+ 448 007d 03       		.uleb128 0x3
+ 449 007e 0E       		.uleb128 0xe
+ 450 007f 3A       		.uleb128 0x3a
+ 451 0080 0B       		.uleb128 0xb
+ 452 0081 3B       		.uleb128 0x3b
+ 453 0082 0B       		.uleb128 0xb
+ 454 0083 49       		.uleb128 0x49
+ 455 0084 13       		.uleb128 0x13
+ 456 0085 3F       		.uleb128 0x3f
+ 457 0086 19       		.uleb128 0x19
+ 458 0087 02       		.uleb128 0x2
+ 459 0088 18       		.uleb128 0x18
+ 460 0089 00       		.byte	0
+ 461 008a 00       		.byte	0
+ 462 008b 00       		.byte	0
+ 463              		.section	.debug_aranges,"",%progbits
+ 464 0000 1C000000 		.4byte	0x1c
+ 465 0004 0200     		.2byte	0x2
+ 466 0006 00000000 		.4byte	.Ldebug_info0
+ 467 000a 04       		.byte	0x4
+ 468 000b 00       		.byte	0
+ 469 000c 0000     		.2byte	0
+ 470 000e 0000     		.2byte	0
+ 471 0010 00000000 		.4byte	.LFB36
+ 472 0014 86000000 		.4byte	.LFE36-.LFB36
+ 473 0018 00000000 		.4byte	0
+ 474 001c 00000000 		.4byte	0
+ 475              		.section	.debug_ranges,"",%progbits
+ 476              	.Ldebug_ranges0:
+ 477 0000 00000000 		.4byte	.LFB36
+ 478 0004 86000000 		.4byte	.LFE36
+ 479 0008 00000000 		.4byte	0
+ 480 000c 00000000 		.4byte	0
+ 481              		.section	.debug_line,"",%progbits
+ 482              	.Ldebug_line0:
+ 483 0000 78000000 		.section	.debug_str,"MS",%progbits,1
+ 483      02004100 
+ 483      00000201 
+ 483      FB0E0D00 
+ 483      01010101 
+ 484              	.LASF6:
+ 485 0000 6C6F6E67 		.ascii	"long long int\000"
+ 485      206C6F6E 
+ 485      6720696E 
+ 485      7400
+ 486              	.LASF20:
+ 487 000e 474E5520 		.ascii	"GNU C 4.9.3 20150303 (release) [ARM/embedded-4_9-br"
+ 487      4320342E 
+ 487      392E3320 
+ 487      32303135 
+ 487      30333033 
+ 488 0041 616E6368 		.ascii	"anch revision 221220] -mcpu=cortex-m0 -mthumb -g -O"
+ 488      20726576 
+ 488      6973696F 
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 13
+
+
+ 488      6E203232 
+ 488      31323230 
+ 489 0074 30202D66 		.ascii	"0 -ffunction-sections -ffat-lto-objects\000"
+ 489      66756E63 
+ 489      74696F6E 
+ 489      2D736563 
+ 489      74696F6E 
+ 490              	.LASF8:
+ 491 009c 756E7369 		.ascii	"unsigned int\000"
+ 491      676E6564 
+ 491      20696E74 
+ 491      00
+ 492              	.LASF21:
+ 493 00a9 6D61696E 		.ascii	"main.c\000"
+ 493      2E6300
+ 494              	.LASF23:
+ 495 00b0 6D61696E 		.ascii	"main\000"
+ 495      00
+ 496              	.LASF9:
+ 497 00b5 75696E74 		.ascii	"uint8\000"
+ 497      3800
+ 498              	.LASF5:
+ 499 00bb 6C6F6E67 		.ascii	"long unsigned int\000"
+ 499      20756E73 
+ 499      69676E65 
+ 499      6420696E 
+ 499      7400
+ 500              	.LASF7:
+ 501 00cd 6C6F6E67 		.ascii	"long long unsigned int\000"
+ 501      206C6F6E 
+ 501      6720756E 
+ 501      7369676E 
+ 501      65642069 
+ 502              	.LASF13:
+ 503 00e4 63686172 		.ascii	"char8\000"
+ 503      3800
+ 504              	.LASF1:
+ 505 00ea 756E7369 		.ascii	"unsigned char\000"
+ 505      676E6564 
+ 505      20636861 
+ 505      7200
+ 506              	.LASF14:
+ 507 00f8 63686172 		.ascii	"char\000"
+ 507      00
+ 508              	.LASF16:
+ 509 00fd 636F756E 		.ascii	"count\000"
+ 509      7400
+ 510              	.LASF4:
+ 511 0103 6C6F6E67 		.ascii	"long int\000"
+ 511      20696E74 
+ 511      00
+ 512              	.LASF12:
+ 513 010c 646F7562 		.ascii	"double\000"
+ 513      6C6500
+ 514              	.LASF19:
+ 515 0113 73746F70 		.ascii	"stop\000"
+ 515      00
+ARM GAS  C:\Users\arh\AppData\Local\Temp\ccmc4WvP.s 			page 14
+
+
+ 516              	.LASF22:
+ 517 0118 5C5C766D 		.ascii	"\\\\vmware-host\\Shared Folders\\Documents\\PSoC Cr"
+ 517      77617265 
+ 517      2D686F73 
+ 517      745C5368 
+ 517      61726564 
+ 518 0146 6561746F 		.ascii	"eator\\TestThingSoc\\USBFS_UART01.cydsn\000"
+ 518      725C5465 
+ 518      73745468 
+ 518      696E6753 
+ 518      6F635C55 
+ 519              	.LASF3:
+ 520 016c 73686F72 		.ascii	"short unsigned int\000"
+ 520      7420756E 
+ 520      7369676E 
+ 520      65642069 
+ 520      6E7400
+ 521              	.LASF0:
+ 522 017f 7369676E 		.ascii	"signed char\000"
+ 522      65642063 
+ 522      68617200 
+ 523              	.LASF18:
+ 524 018b 70617269 		.ascii	"parity\000"
+ 524      747900
+ 525              	.LASF11:
+ 526 0192 666C6F61 		.ascii	"float\000"
+ 526      7400
+ 527              	.LASF2:
+ 528 0198 73686F72 		.ascii	"short int\000"
+ 528      7420696E 
+ 528      7400
+ 529              	.LASF10:
+ 530 01a2 75696E74 		.ascii	"uint16\000"
+ 530      313600
+ 531              	.LASF17:
+ 532 01a9 62756666 		.ascii	"buffer\000"
+ 532      657200
+ 533              	.LASF15:
+ 534 01b0 73697A65 		.ascii	"sizetype\000"
+ 534      74797065 
+ 534      00
+ 535              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 4.9.3 20150303 (release) [ARM/embedded-4_9-br
